@@ -2,32 +2,37 @@ const userModel = require('../models/user.model');
 const jwt = require('jsonwebtoken');
 require('dotenv').config()
 
-async function  authMiddleware(req , res) {
-    
+async function authMiddleware(req, res, next) {
+    const token = req.cookies?.token || req.headers.authorization?.split(" ")[1];
 
-    const token = req.cookies.token || req.headers.authorization?.split(" ")[1]
-    if(!token){
+    if (!token) {
         return res.status(401).json({
-            message : "Unauthorized Access ! token missing "
-        })
+            message: "Unauthorized Access ! token missing"
+        });
     }
 
-    try{
-        const decoded = jwt.verify(token , process.env.JWT_SECRET)
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
+        const userId = decoded?.userId || decoded?.id;
+        if (!userId) {
+            return res.status(401).json({ message: "Unauthorized Access ! invalid token" });
+        }
 
-        const user = await userModel.findOne( user.userId)
-        req.user = user 
+        const user = await userModel.findById(userId).select('-password');
+        if (!user) {
+            return res.status(401).json({ message: "Unauthorized Access ! user not found" });
+        }
 
-        return  next()
+        req.user = user;
+        return next();
 
-
-    }catch(err){
+    } catch (err) {
         return res.status(401).json({
-            message : "Unauthorized Access ! token missing "
-        })
+            message: "Unauthorized Access ! invalid token"
+        });
     }
-    
+
 }
 
 

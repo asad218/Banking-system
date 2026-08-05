@@ -1,31 +1,28 @@
-const { Ref } = require('git');
 const mongoose = require('mongoose');
 
-
-const accountSchema = mongoose.Schema({
-    user:{
-        type : mongoose.Schema.Types.ObjectId,
-        ref:"user",
-        required:[true, "Account must be associated with a user"],
-        index:true
+const accountSchema = new mongoose.Schema({
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: [true, "Account must be associated with a user"],
+        index: true
     },
-    status:{
-        enum : {
-            values :["ACTIVE" , "FROZEN" , "CLOSED"],
-            message : "status can only be active , frozen , closed"
-        }
+    status: {
+        type: String,
+        enum: ["ACTIVE", "FROZEN", "CLOSED"],
+        default: "ACTIVE"
     },
-    currency:{
-        type:String,
-        required:[true, "currency required"],
-        default : "INR"
+    currency: {
+        type: String,
+        required: [true, "currency required"],
+        default: "INR"
     }
-},{
-        timestamps:true
-})
+}, {
+    timestamps: true
+});
 
-accountSchema.index({user:1 , status:1})
+accountSchema.index({ user: 1, status: 1 });
 
-const accountModel = mongoose.model("account" , accountSchema)
+const Account = mongoose.model("account", accountSchema);
 
-module.exports = accountModel ;
+module.exports = Account;
